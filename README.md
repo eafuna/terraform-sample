@@ -1,3 +1,19 @@
+## Getting Started
+
+To run the code, you must create terraform.tfvars containing the following:
+
+```terraform
+aws_access_key = "<access_key"
+aws_secret_key = "<secret_key>"
+aws_region     = "<region>"
+```
+
+Alternatively, you can provide these variables through command line, thus:
+
+```sh
+terraform plan -var 'aws_access_key=XXXXXX'
+```
+
 ## Automation Testing
 
 [Terratest](https://terratest.gruntwork.io) uses the Go testing framework. To use Terratest, you need to install version >= 1.13 of [Golang](https://golang.org/)

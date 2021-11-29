@@ -6,17 +6,38 @@ data "aws_availability_zones" "available" {
   state = "available"
 }
 
-data "template_file" "startup" {
-  template = file("init.sh")
-}
-
-data "template_file" "pyfile" {
-  template = file("init.py")
-}
 
 resource "aws_key_pair" "personal" {
   key_name   = "id_rsa"
   public_key = file("/home/natut/.ssh/id_rsa.pub")
+}
+
+
+# Render a part using a `template_file`
+data "template_file" "script" {
+  template = file("init.py")
+}
+
+data "template_file" "cloudinit" {
+  template = file("cloud-init.yaml")
+}
+
+data "template_cloudinit_config" "config" {
+  gzip          = true
+  base64_encode = true
+
+  part {
+    filename     = "init.cfg"
+    content_type = "text/cloud-config"
+    content      = data.template_file.cloudinit.rendered
+  }
+
+  part {
+    filename     = "init.py"
+    content_type = "text/x-shellscript"
+    content      = data.template_file.script.rendered
+  }
+
 }
 
 resource "aws_instance" "ec2" {
@@ -26,7 +47,7 @@ resource "aws_instance" "ec2" {
   subnet_id              = var.subnet_ids[count.index]
   availability_zone      = data.aws_availability_zones.available.names[count.index]
   key_name               = aws_key_pair.personal.key_name
-  user_data              = data.cloudinit_config.main.rendered
+  user_data              = data.template_cloudinit_config.config.rendered
   vpc_security_group_ids = [var.basic_sg_id]
 
   #--------------------------------------------------
@@ -40,27 +61,6 @@ resource "aws_instance" "ec2" {
     Name  = "Flugel"
     Owner = "InfraTeam"
   }
-}
-
-data "cloudinit_config" "main" {
-  gzip          = false
-  base64_encode = false
-
-  # --------------------------------------------------
-  # TODO: run python script
-  # --------------------------------------------------
-  # part {
-  #   content_type = "text/x-shellscript"
-  #   filename     = "init.py"
-  #   content      = data.template_file.pyfile.rendered
-  # }
-
-  part {
-    content_type = "text/x-shellscript"
-    filename     = "init.sh"
-    content      = data.template_file.startup.rendered
-  }
-
 }
 
 

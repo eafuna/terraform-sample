@@ -3,5 +3,5 @@
 packages:
   - nginx
 
-  runcmd:
+runcmd:
   - systemctl start nginx

@@ -6,14 +6,12 @@ data "aws_availability_zones" "available" {
   state = "available"
 }
 
-
 resource "aws_key_pair" "personal" {
   key_name   = "id_rsa"
   public_key = file("/home/natut/.ssh/id_rsa.pub")
 }
 
 
-# Render a part using a `template_file`
 data "template_file" "script" {
   template = file("init.py")
 }

@@ -17,23 +17,24 @@ module "ec2_instance" {
 #-----------------------------------------------
 # TODO: restore aws_s3_bucket
 #-----------------------------------------------
-# resource "aws_s3_bucket" "flugel_s3" {
-#   bucket = "flugel-s3-bucket-eafuna-test"
-#   acl    = "private"
+resource "aws_s3_bucket" "flugel_s3" {
+  bucket = "flugel-s3-bucket-eafuna-test"
+  acl    = "private"
 
-#   versioning {
-#     enabled = true
-#   }
-#   tags = {
-#     Name  = "Flugel"
-#     Owner = "InfraTeam"
-#   }
-# }
+  versioning {
+    enabled = true
+  }
+  tags = {
+    Name  = "Flugel"
+    Owner = "InfraTeam"
+  }
+}
 
 # ec2 module
-# output "aws_ec2_tags_all" {
-#   value = module.ec2_instance.tags_all
-# }
+output "aws_res_tags_all" {
+  value = {"ec2":module.ec2_instance.tags_all, "s3":aws_s3_bucket.flugel_s3.tags_all}
+}
+
 output "aws_ec2_subnets" {
   value = module.ec2_instance.subnets
 }

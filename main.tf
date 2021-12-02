@@ -1,11 +1,22 @@
 terraform {
-  required_version = ">=1.0.00"
+  required_version = ">=1.0.11"
 }
 
-# data "github_actions_public_key" "example_public_key" {
-#   repository = "example_repository"
-# }
+module "network" {
+  source        = "./network"
+  cidr_block    = var.cidr_block
+  ec2_instances = module.ec2_instance.instance_ids
+}
 
+module "ec2_instance" {
+  source      = "./ec2"
+  basic_sg_id = module.network.basic_sg_id
+  subnet_ids  = module.network.subnet_ids
+}
+
+#-----------------------------------------------
+# TODO: restore aws_s3_bucket
+#-----------------------------------------------
 resource "aws_s3_bucket" "flugel_s3" {
   bucket = "flugel-s3-bucket-eafuna-test"
   acl    = "private"
@@ -19,25 +30,21 @@ resource "aws_s3_bucket" "flugel_s3" {
   }
 }
 
-resource "aws_instance" "flugel_ec2" {
-  ami           = "ami-036d0684fc96830ca"
-  instance_type = "t2.micro"
-
-  tags = {
-    Name  = "Flugel"
-    Owner = "InfraTeam"
-  }
+output "aws_ec2_subnets" {
+  value = module.ec2_instance.subnets
+}
+output "aws_ec2_instances_all" {
+  value = module.ec2_instance.instance_ids
+}
+output "aws_ec2_publicips_all" {
+  value = module.ec2_instance.temp_public_ip
 }
 
-output "aws_ec2_tag_name" {
-  value = aws_instance.flugel_ec2.tags.Name
+# network module 
+output "aws_alb_dns_name" {
+  value = module.network.alb_dns_name
 }
-output "aws_ec2_tag_owner" {
-  value = aws_instance.flugel_ec2.tags.Owner
+output "aws_alb_subnet" {
+  value = module.network.subnet_ids
 }
-output "aws_s3_tag_name" {
-  value = aws_s3_bucket.flugel_s3.tags.Name
-}
-output "aws_s3_tag_owner" {
-  value = aws_s3_bucket.flugel_s3.tags.Owner
-}
+

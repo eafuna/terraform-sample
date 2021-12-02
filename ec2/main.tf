@@ -6,10 +6,10 @@ data "aws_availability_zones" "available" {
   state = "available"
 }
 
-resource "aws_key_pair" "personal" {
-  key_name   = "id_rsa"
-  public_key = file("/home/natut/.ssh/id_rsa.pub")
-}
+# resource "aws_key_pair" "personal" {
+#   key_name   = "id_rsa"
+#   public_key = file("/home/XXX/.ssh/id_rsa.pub")
+# }
 
 
 data "template_file" "script" {
@@ -39,20 +39,15 @@ data "template_cloudinit_config" "config" {
 }
 
 resource "aws_instance" "ec2" {
-  count                  = 2
+  count                  = 2 
   ami                    = "ami-036d0684fc96830ca"
   instance_type          = "t2.micro"
   subnet_id              = var.subnet_ids[count.index]
   availability_zone      = data.aws_availability_zones.available.names[count.index]
-  key_name               = aws_key_pair.personal.key_name
   user_data              = data.template_cloudinit_config.config.rendered
   vpc_security_group_ids = [var.basic_sg_id]
+  # key_name               = aws_key_pair.personal.key_name
 
-  #--------------------------------------------------
-  # TODO: 
-  # removing this will remove egress of the instance which would in turn 
-  # prevent us from installing nginx as required
-  #--------------------------------------------------
   associate_public_ip_address = true
 
   tags = {

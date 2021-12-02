@@ -30,11 +30,6 @@ resource "aws_s3_bucket" "flugel_s3" {
   }
 }
 
-# ec2 module
-output "aws_res_tags_all" {
-  value = {"ec2":module.ec2_instance.tags_all, "s3":aws_s3_bucket.flugel_s3.tags_all}
-}
-
 output "aws_ec2_subnets" {
   value = module.ec2_instance.subnets
 }
@@ -44,6 +39,7 @@ output "aws_ec2_instances_all" {
 output "aws_ec2_publicips_all" {
   value = module.ec2_instance.temp_public_ip
 }
+
 # network module 
 output "aws_alb_dns_name" {
   value = module.network.alb_dns_name
@@ -52,6 +48,3 @@ output "aws_alb_subnet" {
   value = module.network.subnet_ids
 }
 
-# output "aws_s3_tags_all" {
-#   value = aws_s3_bucket.flugel_s3.tags_all
-# }
